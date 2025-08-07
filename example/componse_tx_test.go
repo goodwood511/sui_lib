@@ -20,7 +20,7 @@ func TestComposeTx(t *testing.T) {
 		Amount:    1_000_000, // 0.001 SUI
 	}
 
-	_, tx, err := sui_lib.BuildUnsignedTx(params)
+	tx, err := sui_lib.BuildUnsignedTx(params)
 	if err != nil {
 		t.Fatal(err)
 	}
