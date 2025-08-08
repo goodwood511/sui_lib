@@ -21,7 +21,7 @@ type CheckpointResponse struct {
 	} `json:"result"`
 }
 
-func GetCheckpointTransactions(rpcURL string, checkpointNumber string) ([]string, error) {
+func GetCheckpointTransactions(rpcURL string, checkpointNumber string) (*CheckpointResponse, error) {
 	client := resty.New()
 
 	payload := map[string]interface{}{
@@ -46,5 +46,5 @@ func GetCheckpointTransactions(rpcURL string, checkpointNumber string) ([]string
 		return nil, err
 	}
 
-	return result.Result.Transactions, nil
+	return &result, nil
 }
