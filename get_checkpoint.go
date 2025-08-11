@@ -3,6 +3,7 @@ package sui_lib
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -21,7 +22,7 @@ type CheckpointResponse struct {
 	} `json:"result"`
 }
 
-func GetCheckpointTransactions(rpcURL string, checkpointNumber string) (*CheckpointResponse, error) {
+func GetCheckpointTransactions(rpcURL string, checkpointNumber string) (*CheckpointResponse, string, error) {
 	client := resty.New()
 
 	payload := map[string]interface{}{
@@ -38,13 +39,20 @@ func GetCheckpointTransactions(rpcURL string, checkpointNumber string) (*Checkpo
 		Post(rpcURL)
 
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
+	if resp.StatusCode() != 200 {
+		return nil, string(resp.Body()), fmt.Errorf("unexpected http status code: %d", resp.StatusCode())
+	}
+	bodyBytes := resp.Body()
+	bodyString := string(bodyBytes)
 
 	var result CheckpointResponse
-	if err := json.Unmarshal(resp.Body(), &result); err != nil {
-		return nil, err
+	err = json.Unmarshal(bodyBytes, &result)
+	if err != nil {
+		// 解析失败时，返回原始body，方便调试
+		return nil, bodyString, fmt.Errorf("json unmarshal failed: %w", err)
 	}
 
-	return &result, nil
+	return &result, bodyString, nil
 }
